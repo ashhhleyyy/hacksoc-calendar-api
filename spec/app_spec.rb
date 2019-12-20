@@ -45,6 +45,15 @@ DTSTART:20200101T110000Z
 DTEND:20200101T120000Z
 SUMMARY:Event in January
 END:VEVENT
+BEGIN:VEVENT
+UID:recurring@aaronc.cc
+DTSTART;TZID=Europe/London:20181005T190000
+DTEND;TZID=Europe/London:20181005T230000
+DTEND:20200101T120000Z
+RRULE:FREQ=WEEKLY;COUNT=5;INTERVAL=2;BYDAY=FR
+EXDATE;TZID=Europe/London:20181116T190000
+SUMMARY:Recurring Event
+END:VEVENT
 END:VCALENDAR
 ICAL
 
@@ -88,6 +97,17 @@ ICAL
 
       parsed = JSON.parse(last_response.body)
       expect(parsed.length).to eq 0
+    end
+
+    it 'obeys EXDATE' do
+      get '/events/2018/11'
+      expect(last_response).to be_ok
+      expect(last_response.content_type).to start_with 'application/json'
+
+      # There should be 2 events - 2nd and 30th Nov, with 16th Excluded
+
+      parsed = JSON.parse(last_response.body)
+      expect(parsed.length).to eq 2
     end
   end
 
