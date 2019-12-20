@@ -46,13 +46,26 @@ DTEND:20200101T120000Z
 SUMMARY:Event in January
 END:VEVENT
 BEGIN:VEVENT
-UID:recurring@aaronc.cc
 DTSTART;TZID=Europe/London:20181005T190000
 DTEND;TZID=Europe/London:20181005T230000
-DTEND:20200101T120000Z
 RRULE:FREQ=WEEKLY;COUNT=5;INTERVAL=2;BYDAY=FR
 EXDATE;TZID=Europe/London:20181116T190000
-SUMMARY:Recurring Event
+DTSTAMP:20191219T234238Z
+UID:7d8eql2ns6gfeair221cfm9hnk@google.com
+ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=HackSo
+ c Events;X-NUM-GUESTS=0:mailto:yusu.org_h8uou2ovt1c6gg87q5g758tsvs@group.ca
+ lendar.google.com
+CREATED:20180803T211427Z
+DESCRIPTION:In one of the oldest and noblest traditions of HackSoc\, we des
+ cend upon a room\, play many boardgames\, and eat much cake. Both boardgame
+ s and cake are brought along by members\, so if you do enjoy the events\, p
+ lease consider bringing something along.
+LAST-MODIFIED:20180820T165910Z
+LOCATION:The Room Formerly Known as the Pod
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:Board Games & Cake
+TRANSP:OPAQUE
 END:VEVENT
 END:VCALENDAR
 ICAL
@@ -99,15 +112,14 @@ ICAL
       expect(parsed.length).to eq 0
     end
 
-    it 'obeys EXDATE' do
+    it 'obeys EXDATE over a DST boundary' do
       get '/events/2018/11'
       expect(last_response).to be_ok
       expect(last_response.content_type).to start_with 'application/json'
 
-      # There should be 2 events - 2nd and 30th Nov, with 16th Excluded
-
       parsed = JSON.parse(last_response.body)
-      expect(parsed.length).to eq 2
+      expect(parsed.map { |x| x["when_human"]["short_start_date"]}).to eq \
+        ["02/11/2018", "30/11/2018"]
     end
   end
 
