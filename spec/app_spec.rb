@@ -120,6 +120,8 @@ ICAL
       parsed = JSON.parse(last_response.body)
       expect(parsed.map { |x| x["when_human"]["short_start_date"]}).to eq \
         ["02/11/2018", "30/11/2018"]
+      expect(parsed.map { |x| x["when_human"]["start_time"]}).to eq \
+        ["19:00", "19:00"]
     end
   end
 
