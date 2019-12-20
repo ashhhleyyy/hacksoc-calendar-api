@@ -1,18 +1,24 @@
 #!/usr/bin/env ruby
-require 'icalendar'
-require 'icalendar/recurrence'
 require 'open-uri'
-require 'active_support/all'
 require 'sinatra'
+require 'active_support/all'
 require 'json'
+require 'date'
+
+GCAL_API_KEY = ENV['GCAL_API_KEY']
+raise 'you must specify the env variable GCAL_API_KEY' unless GCAL_API_KEY || defined?(RSpec)
 
 module CalendarLoader
-  ICAL_URL = 'https://calendar.google.com/calendar/ical/yusu.org_h8uou2ovt1c6gg87q5g758tsvs%40group.calendar.google.com/public/basic.ics'
+  CALENDAR_ID = 'yusu.org_h8uou2ovt1c6gg87q5g758tsvs@group.calendar.google.com'
+  JSON_URL = "https://www.googleapis.com/calendar/v3/calendars/#{CALENDAR_ID}/events?singleEvents=true&orderBy=startTime&key=#{GCAL_API_KEY}"
 
   def self.body
-    open(ICAL_URL)
+    open(JSON_URL)
   end
 end
+
+# An event loaded from the calendar.
+Event = Struct.new(:summary, :description, :location, :dtstart, :dtend)
 
 ##
 # Converts a calendar event to a hash representation, which can subsequently be
@@ -40,33 +46,29 @@ def event_to_hash(event)
 end
 
 ##
-# Returns an array of all events in the calendar specified by ICAL_URL. This is
+# Returns an array of all events in the calendar specified by JSON_URL. This is
 # very slow!
-# @return [Array<Icalendar::Event>] All events in the calendar.
+# @return [Array<Event>] All events in the calendar.
 def all_events
-  calendar = Icalendar::Calendar.parse(CalendarLoader.body).first
-  calendar.events.flat_map do |event|
-    Time.zone = 'London'
-    event.dtstart = event.dtstart.in_time_zone
-    event.dtend = event.dtend.in_time_zone
-
-    # I really hope there never needs to be an event more than 100 years into
-    # the future
-    event.occurrences_between(Date.today - 100.years, Date.today + 100.years).map do |occurrence|
-      event_occurrence = event.clone
-      event_occurrence.dtstart = occurrence.start_time
-      event_occurrence.dtend = occurrence.end_time
-      event_occurrence
-    end
+  parsed_body = JSON.parse(CalendarLoader.body.read)
+  
+  parsed_body['items'].map do |event_json|
+    event = Event.new
+    event.dtstart     = DateTime.parse(event_json['start']['dateTime'])
+    event.dtend       = DateTime.parse(event_json['end']['dateTime'])
+    event.summary     = event_json['summary']
+    event.description = event_json['description']
+    event.location    = event_json['location']
+    event
   end
 end
 
 ##
-# Gets all of the events from the calendar specified in ICAL_URL which are in
+# Gets all of the events from the calendar specified in JSON_URL which are in
 # the given year and month.
 # @param [Integer] year The calendar year.
 # @param [Integer] month The calendar month; 1 is January.
-# @return [Array<Icalendar::Event>] The events within this month.
+# @return [Array<Event>] The events within this month.
 def events_in_month(year, month)
   all_events
     .select { |e| e.dtstart.month == month && e.dtstart.year == year }
@@ -74,12 +76,12 @@ def events_in_month(year, month)
 end
 
 ##
-# Gets all of the events from the calendar specified in ICAL_URL which are in
+# Gets all of the events from the calendar specified in JSON_URL which are in
 # a 3-month span, whose centre is the given year and month.
 # @param [Integer] year The calendar year.
 # @param [Integer] month The calendar month; 1 is January.
-# @return [Array<Icalendar::Event>] The events within the given month, the month
-#   before, or the month after.
+# @return [Array<Event>] The events within the given month, the month before,
+#   or the month after.
 def events_including_surrounding_months(year, month)
   events = all_events
 
@@ -115,8 +117,8 @@ before do
   response.headers['Access-Control-Allow-Origin'] = '*'
 end
 
-get '/ical' do
-  content_type 'text/calendar'
+get '/json' do
+  content_type 'application/json'
   CalendarLoader.body
 end
 

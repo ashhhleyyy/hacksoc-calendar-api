@@ -1,7 +1,7 @@
 # HackSoc Calendar API
 ## Usage
-### `/ical`
-Returns the HackSoc iCal calendar.
+### `/json`
+Returns the HackSoc calendar in the Google Calendar API v3's JSON format.
 
 ### `/events/<year>/<month>`
 Gets a list of HackSoc calendar events for the given year and month. The month 
@@ -55,12 +55,16 @@ Event objects have these keys:
 
 ## Deployment
 
+**You need a Google Calendar API key**. Go to Google Cloud Console and enable
+the _Google Calendar API_ service, then go to _Credentials_ and copy the
+_Server key_. This will be passed as the `GCAL_API_KEY` environment variable.
+
 For host 0.0.0.0, port 9000, production mode, in a terminal:
 
 ```
 gem install bundler
 bundle install
-bundle exec main.rb -p 9000 -e production
+GCAL_API_KEY=<key> bundle exec main.rb -p 9000 -e production
 ```
 
 Swapping `production` for `development` will enable stack traces and host on `localhost` instead of `0.0.0.0`.
