@@ -56,8 +56,9 @@ Event objects have these keys:
 ## Deployment
 
 **You need a Google Calendar API key**. Go to Google Cloud Console and enable
-the _Google Calendar API_ service, then go to _Credentials_ and copy the
-_Server key_. This will be passed as the `GCAL_API_KEY` environment variable.
+the _Google Calendar API_ service, then go to _Credentials_ under
+_APIs & Services_ and create an API key. This will be passed as the
+`GCAL_API_KEY` environment variable.
 
 For host 0.0.0.0, port 9000, production mode, in a terminal:
 
