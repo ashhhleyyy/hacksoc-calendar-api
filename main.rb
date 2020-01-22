@@ -5,8 +5,9 @@ require 'active_support/all'
 require 'json'
 require 'date'
 
-GCAL_API_KEY = ENV['GCAL_API_KEY']
-raise 'you must specify the env variable GCAL_API_KEY' unless GCAL_API_KEY || defined?(RSpec)
+GCAL_API_KEY_FILE = File.join(__dir__, '.key')
+GCAL_API_KEY = File.exist?(GCAL_API_KEY_FILE) && File.read(GCAL_API_KEY_FILE)
+raise 'you must specify the Google Calendar API key in a ".key" file' unless GCAL_API_KEY || defined?(RSpec)
 
 module CalendarLoader
   CALENDAR_ID = 'yusu.org_h8uou2ovt1c6gg87q5g758tsvs@group.calendar.google.com'
