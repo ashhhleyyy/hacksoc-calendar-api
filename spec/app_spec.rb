@@ -30,7 +30,8 @@ describe 'app' do
     {
       "summary": "Event in January",
       "start": { "dateTime": "2020-01-01T12:00:00Z" },
-      "end": { "dateTime": "2020-01-01T13:00:00Z" }
+      "end": { "dateTime": "2020-01-01T13:00:00Z" },
+      "hangoutLink": "https://example.com/"
     }
   ]
 }
@@ -76,6 +77,26 @@ JSON
 
       parsed = JSON.parse(last_response.body)
       expect(parsed.length).to eq 0
+    end
+
+    context 'Hangouts meeting links' do
+      it 'are extracted in events with them' do
+        get '/events/2020/01'
+        expect(last_response).to be_ok
+        expect(last_response.content_type).to start_with 'application/json'
+
+        event = JSON.parse(last_response.body)[0]
+        expect(event['meeting_link']).to eq 'https://example.com/'
+      end
+
+      it 'are null in events without them' do
+        get '/events/2019/12'
+        expect(last_response).to be_ok
+        expect(last_response.content_type).to start_with 'application/json'
+
+        event = JSON.parse(last_response.body)[0]
+        expect(event['meeting_link']).to eq nil
+      end
     end
   end
 

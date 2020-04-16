@@ -19,7 +19,7 @@ module CalendarLoader
 end
 
 # An event loaded from the calendar.
-Event = Struct.new(:summary, :description, :location, :dtstart, :dtend)
+Event = Struct.new(:summary, :description, :location, :dtstart, :dtend, :meeting_link)
 
 ##
 # Converts a calendar event to a hash representation, which can subsequently be
@@ -42,7 +42,8 @@ def event_to_hash(event)
     },
     summary: event.summary,
     description: event.description,
-    location: event.location
+    location: event.location,
+    meeting_link: event.meeting_link,
   }
 end
 
@@ -55,11 +56,12 @@ def all_events
   
   parsed_body['items'].map do |event_json|
     event = Event.new
-    event.dtstart     = DateTime.parse(event_json['start']['dateTime'])
-    event.dtend       = DateTime.parse(event_json['end']['dateTime'])
-    event.summary     = event_json['summary']
-    event.description = event_json['description']
-    event.location    = event_json['location']
+    event.dtstart      = DateTime.parse(event_json['start']['dateTime'])
+    event.dtend        = DateTime.parse(event_json['end']['dateTime'])
+    event.summary      = event_json['summary']
+    event.description  = event_json['description']
+    event.location     = event_json['location']
+    event.meeting_link = event_json['hangoutLink']
     event
   end
 end
