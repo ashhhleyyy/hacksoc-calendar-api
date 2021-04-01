@@ -11,7 +11,7 @@ raise 'you must specify the Google Calendar API key in a ".key" file' unless GCA
 
 module CalendarLoader
   CALENDAR_ID = 'yusu.org_h8uou2ovt1c6gg87q5g758tsvs@group.calendar.google.com'
-  JSON_URL = "https://www.googleapis.com/calendar/v3/calendars/#{CALENDAR_ID}/events?singleEvents=true&orderBy=startTime&key=#{GCAL_API_KEY}"
+  JSON_URL = "https://www.googleapis.com/calendar/v3/calendars/#{CALENDAR_ID}/events?singleEvents=true&maxResults=2500&orderBy=startTime&key=#{GCAL_API_KEY}"
 
   def self.body
     open(JSON_URL)
