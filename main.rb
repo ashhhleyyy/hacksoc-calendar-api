@@ -14,7 +14,7 @@ module CalendarLoader
   JSON_URL = "https://www.googleapis.com/calendar/v3/calendars/#{CALENDAR_ID}/events?singleEvents=true&maxResults=2500&orderBy=startTime&key=#{GCAL_API_KEY}"
 
   def self.body
-    open(JSON_URL)
+    URI.open(JSON_URL)
   end
 end
 
